@@ -1,5 +1,5 @@
-import express from 'express';
 import bodyParser from 'body-parser';
+import express from 'express';
 
 const app = express();
 
@@ -11,6 +11,8 @@ type Guest = {
   lastName: string;
   deadline?: string;
   attending: boolean;
+  eventName: string;
+  eventLocation: string;
 };
 
 let id = 1;
@@ -24,7 +26,10 @@ app.use(function (_req, res, next) {
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept',
   );
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PATCH, DELETE, OPTIONS',
+  );
   next();
 });
 
@@ -44,7 +49,7 @@ app.post('/', function (req, res) {
     return;
   }
 
-  if (Object.keys(req.body).length > 3) {
+  if (Object.keys(req.body).length > 5) {
     res.status(400).json({
       errors: [
         {
@@ -62,6 +67,8 @@ app.post('/', function (req, res) {
     lastName: req.body.lastName,
     ...(req.body.deadline ? { deadline: req.body.deadline } : {}),
     attending: false,
+    eventName: req.body.eventName,
+    eventLocation: req.body.eventLocation,
   };
 
   guestList.push(guest);
@@ -71,7 +78,14 @@ app.post('/', function (req, res) {
 
 // Modify a single guest
 app.patch('/:id', function (req, res) {
-  const allowedKeys = ['firstName', 'lastName', 'deadline', 'attending'];
+  const allowedKeys = [
+    'firstName',
+    'lastName',
+    'deadline',
+    'attending',
+    'eventName',
+    'eventLocation',
+  ];
   const difference = Object.keys(req.body).filter(
     (key) => !allowedKeys.includes(key),
   );
@@ -105,6 +119,8 @@ app.patch('/:id', function (req, res) {
   if (req.body.firstName) guest.firstName = req.body.firstName;
   if (req.body.lastName) guest.lastName = req.body.lastName;
   if (req.body.deadline) guest.deadline = req.body.deadline;
+  if (req.body.eventName) guest.eventName = req.body.eventName;
+  if (req.body.eventLocation) guest.eventLocation = req.body.eventLocation;
   if ('attending' in req.body) guest.attending = req.body.attending;
   res.json(guest);
 });
